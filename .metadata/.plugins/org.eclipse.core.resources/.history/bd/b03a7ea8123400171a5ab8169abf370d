@@ -1,0 +1,107 @@
+package simulator;
+
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+
+import javax.net.ssl.HttpsURLConnection;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+public class simulator {
+	
+	
+	public static void main(String[] args) throws IOException, JSONException {
+		System.out.println("Inside service");
+		JSONObject jObj;
+        JSONArray jArray = new JSONArray();
+        String fname = "time_dist_lat_lon";
+        FileReader fr = null;
+		try {
+			fr = new FileReader(fname);
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        BufferedReader br = new BufferedReader(fr);
+        
+        int seconds=0;
+        int cnt=0;
+        String line = br.readLine();
+        while(true){
+        	if(cnt>0 && cnt%60==0){
+        		JSONObject data = new JSONObject();
+        		data.put("data", jArray);
+        		String tosend = data.toString();
+        		String url = "http://localhost:8007/FindMyTrain/RequestHandler";
+        		sendpostrequest(url,tosend);
+        		jArray = new JSONArray();
+        	}
+        	String[] a = line.split(",",0);
+        	if(Integer.parseInt(a[0])==cnt){
+        		jObj = new JSONObject();
+	            jObj.put("lat",a[2]);
+	            jObj.put("lon",a[3]);
+	            jObj.put("dist",a[1]);
+	            jObj.put("routeID","1");
+	            jObj.put("direction","1");
+	            jObj.put("timeStamp","0");
+	            jArray.put(jObj);
+	            line=br.readLine();
+        	}
+
+        	cnt = cnt+1;
+        	//Thread.sleep(1000);
+        	if(line==null) break;
+        }
+        
+        
+	}
+
+	private static void sendpostrequest(String url, String tosend) throws IOException {
+		// TODO Auto-generated method stub
+		URL obj = new URL(url);
+		HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+		con.setRequestMethod("POST");
+		con.setRequestProperty("User-Agent", "chrome");
+		con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
+
+		String urlParameters = "sn=C02G8416DRJM&cn=&locale=&caller=&num=12345";
+
+		// Send post request
+		con.setDoOutput(true);
+		DataOutputStream wr = new DataOutputStream(con.getOutputStream());
+		wr.writeBytes(urlParameters);
+		wr.flush();
+		wr.close();
+
+		int responseCode = con.getResponseCode();
+		System.out.println("\nSending 'POST' request to URL : " + url);
+		System.out.println("Post parameters : " + urlParameters);
+		System.out.println("Response Code : " + responseCode);
+
+		BufferedReader in = new BufferedReader(
+		        new InputStreamReader(con.getInputStream()));
+		String inputLine;
+		StringBuffer response = new StringBuffer();
+
+		while ((inputLine = in.readLine()) != null) {
+			response.append(inputLine);
+		}
+		in.close();
+
+		//print result
+		System.out.println(response.toString());
+	}
+
+	
+
+}

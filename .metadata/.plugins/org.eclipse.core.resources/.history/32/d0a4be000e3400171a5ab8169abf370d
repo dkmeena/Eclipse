@@ -1,0 +1,27 @@
+package simulator;
+
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+public class simulator {
+
+	public static void main(String[] args) {
+		System.out.println("Inside service");
+		JSONObject jObj;
+        JSONArray jArray = new JSONArray();
+        String fname = "./time_dist_lat_lon";
+        FileReader fr;
+		try {
+			fr = new FileReader(fname);
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        BufferedReader br = new BufferedReader(fr);
+	}
+
+}
